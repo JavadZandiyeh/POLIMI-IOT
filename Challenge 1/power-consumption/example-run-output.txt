@@ -1,0 +1,185 @@
+ets Jul 29 2019 12:21:46
+
+rst:0x1 (POWERON_RESET),boot:0x13 (SPI_FAST_FLASH_BOOT)
+configsip: 0, SPIWP:0xee
+clk_drv:0x00,q_drv:0x00,d_drv:0x00,cs0_drv:0x00,hd_drv:0x00,wp_drv:0x00
+mode:DIO, clock div:2
+load:0x3fff0030,len:1156
+load:0x40078000,len:11456
+ho 0 tail 12 room 4
+load:0x40080400,len:2972
+entry 0x400805dc
+[run log] payload: MOTION_NOT_DETECTED-LUMINOSITY:125
+[run log] send_status: success
+[run log] sensor_read_us: 152
+[run log] sensor_idle_us: 217711
+[run log] sender_spike_us: 754
+[run log] sender_idle_us: 1813
+[run log] wifi_on_us: 793
+[run log] wifi_off_us: 2321
+[run log] boot_us: 743
+[run log] deep_sleep_s: 1.70
+ets Jul 29 2019 12:21:46
+
+rst:0x8 (TG1WDT_SYS_RESET),boot:0x13 (SPI_FAST_FLASH_BOOT)
+configsip: 0, SPIWP:0xee
+clk_drv:0x00,q_drv:0x00,d_drv:0x00,cs0_drv:0x00,hd_drv:0x00,wp_drv:0x00
+mode:DIO, clock div:2
+load:0x3fff0030,len:1156
+load:0x40078000,len:11456
+ho 0 tail 12 room 4
+load:0x40080400,len:2972
+entry 0x400805dc
+ets Jul 29 2019 12:21:46
+
+rst:0x5 (DEEPSLEEP_RESET),boot:0x13 (SPI_FAST_FLASH_BOOT)
+configsip: 0, SPIWP:0xee
+clk_drv:0x00,q_drv:0x00,d_drv:0x00,cs0_drv:0x00,hd_drv:0x00,wp_drv:0x00
+mode:DIO, clock div:2
+load:0x3fff0030,len:1156
+load:0x40078000,len:11456
+ho 0 tail 12 room 4
+load:0x40080400,len:2972
+entry 0x400805dc
+E (1801) phy_init: load_cal_data_from_nvs_handle: calibration data MAC check failed: expected 00:00:00:00:00:00, found 24:0a:c4:00:01:10
+[run log] payload: MOTION_NOT_DETECTED-LUMINOSITY:470
+[run log] send_status: success
+[run log] sensor_read_us: 153
+[run log] sensor_idle_us: 231172
+[run log] sender_spike_us: 897
+[run log] sender_idle_us: 1849
+[run log] wifi_on_us: 935
+[run log] wifi_off_us: 2365
+[run log] boot_us: 762
+[run log] deep_sleep_s: 1.70
+ets Jul 29 2019 12:21:46
+
+rst:0x8 (TG1WDT_SYS_RESET),boot:0x13 (SPI_FAST_FLASH_BOOT)
+configsip: 0, SPIWP:0xee
+clk_drv:0x00,q_drv:0x00,d_drv:0x00,cs0_drv:0x00,hd_drv:0x00,wp_drv:0x00
+mode:DIO, clock div:2
+load:0x3fff0030,len:1156
+load:0x40078000,len:11456
+ho 0 tail 12 room 4
+load:0x40080400,len:2972
+entry 0x400805dc
+ets Jul 29 2019 12:21:46
+
+rst:0x5 (DEEPSLEEP_RESET),boot:0x13 (SPI_FAST_FLASH_BOOT)
+configsip: 0, SPIWP:0xee
+clk_drv:0x00,q_drv:0x00,d_drv:0x00,cs0_drv:0x00,hd_drv:0x00,wp_drv:0x00
+mode:DIO, clock div:2
+load:0x3fff0030,len:1156
+load:0x40078000,len:11456
+ho 0 tail 12 room 4
+load:0x40080400,len:2972
+entry 0x400805dc
+[run log] payload: MOTION_DETECTED-LUMINOSITY:010
+[run log] send_status: success
+[run log] sensor_read_us: 152
+[run log] sensor_idle_us: 65739
+[run log] sender_spike_us: 734
+[run log] sender_idle_us: 1729
+[run log] wifi_on_us: 772
+[run log] wifi_off_us: 2210
+[run log] boot_us: 749
+[run log] deep_sleep_s: 1.70
+ets Jul 29 2019 12:21:46
+
+rst:0x8 (TG1WDT_SYS_RESET),boot:0x13 (SPI_FAST_FLASH_BOOT)
+configsip: 0, SPIWP:0xee
+clk_drv:0x00,q_drv:0x00,d_drv:0x00,cs0_drv:0x00,hd_drv:0x00,wp_drv:0x00
+mode:DIO, clock div:2
+load:0x3fff0030,len:1156
+load:0x40078000,len:11456
+ho 0 tail 12 room 4
+load:0x40080400,len:2972
+entry 0x400805dc
+ets Jul 29 2019 12:21:46
+
+rst:0x5 (DEEPSLEEP_RESET),boot:0x13 (SPI_FAST_FLASH_BOOT)
+configsip: 0, SPIWP:0xee
+clk_drv:0x00,q_drv:0x00,d_drv:0x00,cs0_drv:0x00,hd_drv:0x00,wp_drv:0x00
+mode:DIO, clock div:2
+load:0x3fff0030,len:1156
+load:0x40078000,len:11456
+ho 0 tail 12 room 4
+load:0x40080400,len:2972
+entry 0x400805dc
+[run log] payload: MOTION_DETECTED-LUMINOSITY:010
+[run log] send_status: success
+[run log] sensor_read_us: 127
+[run log] sensor_idle_us: 67488
+[run log] sender_spike_us: 698
+[run log] sender_idle_us: 1708
+[run log] wifi_on_us: 735
+[run log] wifi_off_us: 2159
+[run log] boot_us: 745
+[run log] deep_sleep_s: 1.70
+ets Jul 29 2019 12:21:46
+
+rst:0x8 (TG1WDT_SYS_RESET),boot:0x13 (SPI_FAST_FLASH_BOOT)
+configsip: 0, SPIWP:0xee
+clk_drv:0x00,q_drv:0x00,d_drv:0x00,cs0_drv:0x00,hd_drv:0x00,wp_drv:0x00
+mode:DIO, clock div:2
+load:0x3fff0030,len:1156
+load:0x40078000,len:11456
+ho 0 tail 12 room 4
+load:0x40080400,len:2972
+entry 0x400805dc
+ets Jul 29 2019 12:21:46
+
+rst:0x5 (DEEPSLEEP_RESET),boot:0x13 (SPI_FAST_FLASH_BOOT)
+configsip: 0, SPIWP:0xee
+clk_drv:0x00,q_drv:0x00,d_drv:0x00,cs0_drv:0x00,hd_drv:0x00,wp_drv:0x00
+mode:DIO, clock div:2
+load:0x3fff0030,len:1156
+load:0x40078000,len:11456
+ho 0 tail 12 room 4
+load:0x40080400,len:2972
+entry 0x400805dc
+[run log] payload: MOTION_NOT_DETECTED-LUMINOSITY:502
+[run log] send_status: success
+[run log] sensor_read_us: 140
+[run log] sensor_idle_us: 66306
+[run log] sender_spike_us: 720
+[run log] sender_idle_us: 1880
+[run log] wifi_on_us: 759
+[run log] wifi_off_us: 2387
+[run log] boot_us: 727
+[run log] deep_sleep_s: 1.70
+ets Jul 29 2019 12:21:46
+
+rst:0x8 (TG1WDT_SYS_RESET),boot:0x13 (SPI_FAST_FLASH_BOOT)
+configsip: 0, SPIWP:0xee
+clk_drv:0x00,q_drv:0x00,d_drv:0x00,cs0_drv:0x00,hd_drv:0x00,wp_drv:0x00
+mode:DIO, clock div:2
+load:0x3fff0030,len:1156
+load:0x40078000,len:11456
+ho 0 tail 12 room 4
+load:0x40080400,len:2972
+entry 0x400805dc
+ets Jul 29 2019 12:21:46
+
+rst:0x5 (DEEPSLEEP_RESET),boot:0x13 (SPI_FAST_FLASH_BOOT)
+configsip: 0, SPIWP:0xee
+clk_drv:0x00,q_drv:0x00,d_drv:0x00,cs0_drv:0x00,hd_drv:0x00,wp_drv:0x00
+mode:DIO, clock div:2
+load:0x3fff0030,len:1156
+load:0x40078000,len:11456
+ho 0 tail 12 room 4
+load:0x40080400,len:2972
+entry 0x400805dc
+[run log] payload: MOTION_NOT_DETECTED-LUMINOSITY:502
+[run log] send_status: success
+[run log] sensor_read_us: 151
+[run log] sensor_idle_us: 66057
+[run log] sender_spike_us: 739
+[run log] sender_idle_us: 1881
+[run log] wifi_on_us: 777
+[run log] wifi_off_us: 2359
+[run log] boot_us: 732
+[run log] deep_sleep_s: 1.70
+
+
+[session terminated]

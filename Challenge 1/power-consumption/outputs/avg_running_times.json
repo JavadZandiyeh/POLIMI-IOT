@@ -1,0 +1,10 @@
+{
+  "boot_s": 0.000743,
+  "wifi_on_s": 0.0007956,
+  "wifi_off_s": 0.002296,
+  "sensor_idle_s": 0.0993524,
+  "sensor_read_s": 0.0001446,
+  "sender_spike_s": 0.0007576,
+  "sender_idle_s": 0.0018094,
+  "deep_sleep_s": 1.7
+}

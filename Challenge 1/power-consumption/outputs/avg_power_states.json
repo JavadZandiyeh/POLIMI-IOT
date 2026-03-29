@@ -1,0 +1,16 @@
+{
+  "sender.csv": {
+    "tx_baseline_mW": 606.1546402349481,
+    "tx_spike_mW": 660.956875
+  },
+  "deep_sleep.csv": {
+    "ds_sleep_mW": 45.77679039301288,
+    "ds_boot_mW": 366.88076923076926,
+    "ds_wifi_off_mW": 251.92654911838778,
+    "ds_wifi_on_mW": 632.0388500000003
+  },
+  "sensor-read.csv": {
+    "sr_idle_mW": 237.9350585937499,
+    "sr_read_mW": 350.02880998080633
+  }
+}
