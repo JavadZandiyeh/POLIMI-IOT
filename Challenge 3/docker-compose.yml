@@ -1,0 +1,40 @@
+services:
+
+  # ─── MQTT Broker ────────────────────────────────────────────────────────────
+  mosquitto:
+    image: eclipse-mosquitto:2
+    container_name: challenge3-mosquitto
+    restart: unless-stopped
+    ports:
+      - "1884:1884"          # expose to host so we can test with local clients
+    volumes:
+      - ./mosquitto/config:/mosquitto/config:ro
+      - ./mosquitto/data:/mosquitto/data
+      - ./mosquitto/log:/mosquitto/log
+    networks:
+      - iot-net
+
+  # ─── Node-RED ───────────────────────────────────────────────────────────────
+  nodered:
+    image: nodered/node-red:latest
+    container_name: challenge3-nodered
+    restart: unless-stopped
+    environment:
+      - TZ=Europe/Rome
+      # Install extra palettes on first start (space-separated)
+      - NODE_RED_EXTRA_PALETTES=node-red-dashboard
+    ports:
+      - "1880:1880"          # Node-RED editor → http://localhost:1880
+    volumes:
+      # Node-RED settings, flows and installed nodes persist here
+      - ./nodered-data:/data
+      # Challenge files (CSV input + CSV outputs) are visible inside the container
+      - ./:/challenge3:rw
+    depends_on:
+      - mosquitto
+    networks:
+      - iot-net
+
+networks:
+  iot-net:
+    driver: bridge

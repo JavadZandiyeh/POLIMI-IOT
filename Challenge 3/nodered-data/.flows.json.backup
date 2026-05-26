@@ -1,0 +1,682 @@
+[
+    {
+        "id": "c2a9723ca23517ee",
+        "type": "tab",
+        "label": "Challenge 3",
+        "disabled": false,
+        "info": ""
+    },
+    {
+        "id": "mqtt_broker_cfg",
+        "type": "mqtt-broker",
+        "name": "Local Mosquitto 1884",
+        "broker": "mosquitto",
+        "port": "1884",
+        "clientid": "nodered_c3",
+        "autoConnect": true,
+        "usetls": false,
+        "protocolVersion": "4",
+        "keepalive": "60",
+        "cleansession": true,
+        "autoUnsubscribe": true,
+        "birthTopic": "",
+        "birthQos": "0",
+        "birthPayload": "",
+        "birthMsg": {},
+        "closeTopic": "",
+        "closeQos": "0",
+        "closePayload": "",
+        "closeMsg": {},
+        "willTopic": "",
+        "willQos": "0",
+        "willPayload": "",
+        "willMsg": {},
+        "userProps": "",
+        "sessionExpiry": ""
+    },
+    {
+        "id": "ui_tab",
+        "type": "ui_tab",
+        "name": "Challenge 3",
+        "icon": "dashboard",
+        "disabled": false,
+        "hidden": false
+    },
+    {
+        "id": "chart_grp",
+        "type": "ui_group",
+        "name": "ZigBee Measurements",
+        "tab": "ui_tab",
+        "order": 1,
+        "disp": true,
+        "width": 12,
+        "collapse": false
+    },
+    {
+        "id": "ba707d52704c8373",
+        "type": "ui_base",
+        "theme": {
+            "name": "theme-light",
+            "lightTheme": {
+                "default": "#0094CE",
+                "baseColor": "#0094CE",
+                "baseFont": "-apple-system,BlinkMacSystemFont,Segoe UI,Roboto,Oxygen-Sans,Ubuntu,Cantarell,Helvetica Neue,sans-serif",
+                "edited": true,
+                "reset": false
+            },
+            "darkTheme": {
+                "default": "#097479",
+                "baseColor": "#097479",
+                "baseFont": "-apple-system,BlinkMacSystemFont,Segoe UI,Roboto,Oxygen-Sans,Ubuntu,Cantarell,Helvetica Neue,sans-serif",
+                "edited": false
+            },
+            "customTheme": {
+                "name": "Untitled Theme 1",
+                "default": "#4B7930",
+                "baseColor": "#4B7930",
+                "baseFont": "-apple-system,BlinkMacSystemFont,Segoe UI,Roboto,Oxygen-Sans,Ubuntu,Cantarell,Helvetica Neue,sans-serif"
+            },
+            "themeState": {
+                "base-color": {
+                    "default": "#0094CE",
+                    "value": "#0094CE",
+                    "edited": false
+                },
+                "page-titlebar-backgroundColor": {
+                    "value": "#0094CE",
+                    "edited": false
+                },
+                "page-backgroundColor": {
+                    "value": "#fafafa",
+                    "edited": false
+                },
+                "page-sidebar-backgroundColor": {
+                    "value": "#ffffff",
+                    "edited": false
+                },
+                "group-textColor": {
+                    "value": "#1bbfff",
+                    "edited": false
+                },
+                "group-borderColor": {
+                    "value": "#ffffff",
+                    "edited": false
+                },
+                "group-backgroundColor": {
+                    "value": "#ffffff",
+                    "edited": false
+                },
+                "widget-textColor": {
+                    "value": "#111111",
+                    "edited": false
+                },
+                "widget-backgroundColor": {
+                    "value": "#0094ce",
+                    "edited": false
+                },
+                "widget-borderColor": {
+                    "value": "#ffffff",
+                    "edited": false
+                },
+                "base-font": {
+                    "value": "-apple-system,BlinkMacSystemFont,Segoe UI,Roboto,Oxygen-Sans,Ubuntu,Cantarell,Helvetica Neue,sans-serif"
+                }
+            },
+            "angularTheme": {
+                "primary": "indigo",
+                "accents": "blue",
+                "warn": "red",
+                "background": "grey",
+                "palette": "light"
+            }
+        },
+        "site": {
+            "name": "Node-RED Dashboard",
+            "hideToolbar": "false",
+            "allowSwipe": "false",
+            "lockMenu": "false",
+            "allowTempTheme": "true",
+            "dateFormat": "DD/MM/YYYY",
+            "sizes": {
+                "sx": 48,
+                "sy": 48,
+                "gx": 6,
+                "gy": 6,
+                "cx": 6,
+                "cy": 6,
+                "px": 0,
+                "py": 0
+            }
+        }
+    },
+    {
+        "id": "5d53d441bedac0cf",
+        "type": "inject",
+        "z": "c2a9723ca23517ee",
+        "name": "Load CSV on startup",
+        "props": [
+            {
+                "p": "payload"
+            }
+        ],
+        "repeat": "",
+        "crontab": "",
+        "once": true,
+        "onceDelay": 0.5,
+        "topic": "",
+        "payload": "",
+        "payloadType": "date",
+        "x": 160,
+        "y": 40,
+        "wires": [
+            [
+                "31a392d2b907ff6a"
+            ]
+        ]
+    },
+    {
+        "id": "31a392d2b907ff6a",
+        "type": "file in",
+        "z": "c2a9723ca23517ee",
+        "name": "Read challenge3.csv",
+        "filename": "/challenge3/challenge3.csv",
+        "filenameType": "str",
+        "format": "utf8",
+        "chunk": false,
+        "sendError": false,
+        "encoding": "none",
+        "allProps": false,
+        "x": 420,
+        "y": 40,
+        "wires": [
+            [
+                "986cebc17c4795f4"
+            ]
+        ]
+    },
+    {
+        "id": "986cebc17c4795f4",
+        "type": "function",
+        "z": "c2a9723ca23517ee",
+        "name": "Parse & Store CSV",
+        "func": "// CSV parser: handles double-quoted fields that may contain commas\nfunction parseCSVLine(line) {\n    var result = [];\n    var cur = '';\n    var inQ = false;\n    for (var i = 0; i < line.length; i++) {\n        var c = line[i];\n        if (c === '\"') {\n            if (inQ && line[i+1] === '\"') { cur += '\"'; i++; }\n            else inQ = !inQ;\n        } else if (c === ',' && !inQ) {\n            result.push(cur); cur = '';\n        } else cur += c;\n    }\n    result.push(cur);\n    return result;\n}\n\nvar lines = msg.payload.split('\\n');\nvar headers = parseCSVLine(lines[0]);\nvar data = {};\nfor (var i = 1; i < lines.length; i++) {\n    var line = lines[i].trim();\n    if (!line) continue;\n    var fields = parseCSVLine(line);\n    var pktNum = parseInt(fields[0], 10);\n    if (isNaN(pktNum)) continue;\n    var row = {};\n    for (var j = 0; j < headers.length; j++) {\n        row[headers[j].trim()] = (fields[j] !== undefined ? fields[j] : '').trim();\n    }\n    data[pktNum] = row;\n}\nglobal.set('csvData', data);\nglobal.set('msgCount', 0);\nglobal.set('done', false);\nglobal.set('logCounter', 0);\nglobal.set('filteredCounter', 0);\nglobal.set('linkCosts', {});\nnode.log('CSV loaded: ' + Object.keys(data).length + ' rows');\nreturn null;",
+        "outputs": 1,
+        "timeout": "",
+        "noerr": 0,
+        "initialize": "",
+        "finalize": "",
+        "libs": [],
+        "x": 670,
+        "y": 40,
+        "wires": [
+            []
+        ]
+    },
+    {
+        "id": "fe42d24e0ad75ba4",
+        "type": "inject",
+        "z": "c2a9723ca23517ee",
+        "name": "Every 1 second",
+        "props": [
+            {
+                "p": "payload",
+                "v": "",
+                "vt": "date"
+            }
+        ],
+        "repeat": "1",
+        "once": false,
+        "onceDelay": 0.1,
+        "topic": "",
+        "payload": "",
+        "payloadType": "date",
+        "x": 140,
+        "y": 200,
+        "wires": [
+            [
+                "56139aefb0cd5410"
+            ]
+        ]
+    },
+    {
+        "id": "56139aefb0cd5410",
+        "type": "function",
+        "z": "c2a9723ca23517ee",
+        "name": "Generate ID & Timestamp",
+        "func": "var id = Math.floor(Math.random() * 30001);\nvar ts = Math.floor(Date.now() / 1000);\nmsg.payload = JSON.stringify({\"id\": id, \"timestamp\": ts});\nmsg.genId = id;\nmsg.genTs = ts;\nreturn msg;",
+        "outputs": 2,
+        "x": 390,
+        "y": 200,
+        "wires": [
+            [
+                "9a9615aa7514d218",
+                "b5dc3c321c481233"
+            ],
+            []
+        ]
+    },
+    {
+        "id": "9a9615aa7514d218",
+        "type": "mqtt out",
+        "z": "c2a9723ca23517ee",
+        "name": "Publish to id_generator",
+        "topic": "challenge3/id_generator",
+        "qos": "0",
+        "retain": "false",
+        "respTopic": "",
+        "contentType": "",
+        "userProps": "",
+        "correl": "",
+        "expiry": "",
+        "broker": "mqtt_broker_cfg",
+        "x": 710,
+        "y": 160,
+        "wires": []
+    },
+    {
+        "id": "b5dc3c321c481233",
+        "type": "function",
+        "z": "c2a9723ca23517ee",
+        "name": "Format id_log.csv",
+        "func": "var counter = (global.get('logCounter') || 0) + 1;\nglobal.set('logCounter', counter);\nvar data = (typeof msg.payload === 'string') ? JSON.parse(msg.payload) : msg.payload;\nvar line = (counter === 1 ? 'No.,ID,TIMESTAMP\\n' : '') +\n           counter + ',' + data.id + ',' + data.timestamp + '\\n';\nmsg.payload = line;\nmsg.filename = '/challenge3/id_log.csv';\nreturn msg;",
+        "outputs": 1,
+        "x": 690,
+        "y": 240,
+        "wires": [
+            [
+                "6a171dc8bcf59f05"
+            ]
+        ]
+    },
+    {
+        "id": "6a171dc8bcf59f05",
+        "type": "file",
+        "z": "c2a9723ca23517ee",
+        "name": "Write id_log.csv",
+        "filename": "/challenge3/id_log.csv",
+        "filenameType": "str",
+        "appendNewline": false,
+        "createDir": true,
+        "overwriteFile": "false",
+        "encoding": "none",
+        "x": 920,
+        "y": 240,
+        "wires": [
+            []
+        ]
+    },
+    {
+        "id": "2b8186ec3197e064",
+        "type": "mqtt in",
+        "z": "c2a9723ca23517ee",
+        "name": "Subscribe id_generator",
+        "topic": "challenge3/id_generator",
+        "qos": "0",
+        "datatype": "auto-detect",
+        "broker": "mqtt_broker_cfg",
+        "nl": false,
+        "rap": true,
+        "rh": 0,
+        "inputs": 0,
+        "x": 140,
+        "y": 440,
+        "wires": [
+            [
+                "cd6fa5dcd5cfe734"
+            ]
+        ]
+    },
+    {
+        "id": "cd6fa5dcd5cfe734",
+        "type": "function",
+        "z": "c2a9723ca23517ee",
+        "name": "Counter + Route (200 msgs)",
+        "func": "// Gate: stop after 200 messages; also compute N and route by packet type\nif (global.get('done')) return null;\n\nvar count = (global.get('msgCount') || 0) + 1;\nglobal.set('msgCount', count);\n\nvar data = (typeof msg.payload === 'string') ? JSON.parse(msg.payload) : msg.payload;\nvar id = data.id;\nvar N = id % 5218;\nvar csvData = global.get('csvData');\nif (!csvData) { node.warn('CSV not loaded'); return null; }\n\nvar row = csvData[N];\nvar isDone = (count >= 200);\nif (isDone) global.set('done', true);\n\nvar finalMsg = isDone ? {payload: 'finalize'} : null;\n\nif (!row) {\n    // No matching row – ignore but count toward 200\n    return [null, null, null, finalMsg];\n}\n\nvar cmdStr = row['Command String'] || '';\nvar packetType = row['Packet Type'] || '';\nvar hasZCL = cmdStr.indexOf(\"'Layer ZBEE_ZCL'\") !== -1 ||\n             cmdStr.indexOf('\"Layer ZBEE_ZCL\"') !== -1;\nvar isLink = packetType.indexOf('Link Status (0x08)') !== -1;\n\nmsg.subId = id;\nmsg.N = N;\nmsg.csvRow = row;\nmsg.cmdStr = cmdStr;\nmsg.packetType = packetType;\n\n// Outputs: 0=ZCL, 1=LinkStatus, 2=Other/Ignore, 3=Finalize trigger\nif (hasZCL)   return [msg,  null, null, finalMsg];\nif (isLink)   return [null, msg,  null, finalMsg];\n              return [null, null, msg,  finalMsg];",
+        "outputs": 4,
+        "timeout": "",
+        "noerr": 0,
+        "initialize": "",
+        "finalize": "",
+        "libs": [],
+        "x": 420,
+        "y": 440,
+        "wires": [
+            [
+                "cfeb823a0de1fc04"
+            ],
+            [
+                "a3c2689899ede880"
+            ],
+            [
+                "5c40b3f9afb656fc"
+            ],
+            [
+                "6be5c27529b67ac8"
+            ]
+        ]
+    },
+    {
+        "id": "5c40b3f9afb656fc",
+        "type": "debug",
+        "z": "c2a9723ca23517ee",
+        "name": "Ignored messages",
+        "active": false,
+        "tosidebar": true,
+        "console": false,
+        "tostatus": false,
+        "complete": "payload",
+        "targetType": "msg",
+        "statusVal": "",
+        "statusType": "auto",
+        "x": 730,
+        "y": 360,
+        "wires": []
+    },
+    {
+        "id": "cfeb823a0de1fc04",
+        "type": "delay",
+        "z": "c2a9723ca23517ee",
+        "name": "Rate Limit 10/min",
+        "pauseType": "rate",
+        "timeout": "5",
+        "timeoutUnits": "seconds",
+        "rate": "10",
+        "nbRateUnits": "1",
+        "rateUnits": "minute",
+        "randomFirst": "1",
+        "randomLast": "5",
+        "randomUnits": "seconds",
+        "drop": false,
+        "allowrate": false,
+        "outputs": 1,
+        "x": 730,
+        "y": 440,
+        "wires": [
+            [
+                "9d0de99623796520"
+            ]
+        ]
+    },
+    {
+        "id": "9d0de99623796520",
+        "type": "function",
+        "z": "c2a9723ca23517ee",
+        "name": "Build ZCL MQTT Payload",
+        "func": "var row = msg.csvRow;\nvar ts = Math.floor(Date.now() / 1000);\nvar devName = row['Device Name ZigBee Source'] || 'unknown';\n\nvar payload = {\n    \"timestamp\": ts,\n    \"id\": msg.subId,\n    \"wpan.src\":  row['Source Address'],\n    \"wpan.dst\":  row['Destination Address'],\n    \"zbee.src\":  row['Source Address ZigBee'],\n    \"zbee.dst\":  row['Destination Address ZigBee'],\n    \"topic\":     \"ZigBee/\" + devName,\n    \"payload\":   row['Command String']\n};\n\n// Output 1: MQTT publish message\n// Output 2: same msg passed along for RMS filtering\nvar mqttMsg = {topic: devName, payload: JSON.stringify(payload)};\nmsg.publishTs = ts;\nreturn [mqttMsg, msg];",
+        "outputs": 2,
+        "x": 990,
+        "y": 440,
+        "wires": [
+            [
+                "fde77a756f6e2dde"
+            ],
+            [
+                "f9d2039591ea9057"
+            ]
+        ]
+    },
+    {
+        "id": "fde77a756f6e2dde",
+        "type": "mqtt out",
+        "z": "c2a9723ca23517ee",
+        "name": "Publish to ZigBee Topic",
+        "topic": "",
+        "qos": "0",
+        "retain": "false",
+        "respTopic": "",
+        "contentType": "",
+        "userProps": "",
+        "correl": "",
+        "expiry": "",
+        "broker": "mqtt_broker_cfg",
+        "x": 1290,
+        "y": 380,
+        "wires": []
+    },
+    {
+        "id": "f9d2039591ea9057",
+        "type": "function",
+        "z": "c2a9723ca23517ee",
+        "name": "Filter RMS / Active Power",
+        "func": "var cmdStr = msg.cmdStr || msg.csvRow['Command String'] || '';\nvar ts = msg.publishTs || Math.floor(Date.now() / 1000);\n\nvar hasRMS = cmdStr.indexOf('RMS Current') !== -1 ||\n             cmdStr.indexOf('RMS Voltage') !== -1 ||\n             cmdStr.indexOf('Active Power') !== -1;\nif (!hasRMS) return null;\n\n// Convert Python dict string to JSON-parseable\nfunction py2json(s) {\n    return s.replace(/'/g, '\"')\n            .replace(/\\bTrue\\b/g, 'true')\n            .replace(/\\bFalse\\b/g, 'false')\n            .replace(/\\bNone\\b/g, 'null');\n}\n\nvar cmd;\ntry { cmd = JSON.parse(py2json(cmdStr)); }\ncatch(e) { node.warn('Parse error: ' + e.message); return null; }\n\nvar attrs = cmd['Attribute'];\nif (!attrs) return null;\nif (!Array.isArray(attrs)) attrs = [attrs];\n// Skip Read Attributes REQUESTS (no Status = no actual values to save)\nif (!cmd['Status']) return null;\nvar statuses = cmd['Status'];\nif (!Array.isArray(statuses)) statuses = [statuses];\nvar dataTypes = cmd['Data Type'] || [];\nif (!Array.isArray(dataTypes)) dataTypes = [dataTypes];\nvar seqNum = cmd['Sequence Number'] || '';\n\nfunction getValueKey(dt) {\n    if (!dt) return null;\n    var l = dt.toLowerCase();\n    if (l.indexOf('unsigned') !== -1 && l.indexOf('8-bit') !== -1)  return 'Uint8';\n    if (l.indexOf('signed') !== -1   && l.indexOf('8-bit') !== -1)  return 'Int8';\n    if (l.indexOf('unsigned') !== -1 && l.indexOf('16-bit') !== -1) return 'Uint16';\n    if (l.indexOf('signed') !== -1   && l.indexOf('16-bit') !== -1) return 'Int16';\n    if (l.indexOf('unsigned') !== -1 && l.indexOf('32-bit') !== -1) return 'Uint32';\n    if (l.indexOf('signed') !== -1   && l.indexOf('32-bit') !== -1) return 'Int32';\n    return null;\n}\n\nvar targets = ['Active Power', 'RMS Current', 'RMS Voltage'];\nvar typeCounters = {};\nvar results = [];\n\nfor (var i = 0; i < attrs.length; i++) {\n    var attr     = attrs[i];\n    var dt       = Array.isArray(dataTypes) ? dataTypes[i] : dataTypes;\n    var status   = Array.isArray(statuses)  ? statuses[i]  : statuses;\n    var vKey     = getValueKey(dt);\n    var idx      = vKey ? (typeCounters[vKey] || 0) : 0;\n    if (vKey) typeCounters[vKey] = idx + 1;\n\n    var attrBase = attr.split(' (')[0];\n    var isTarget = targets.some(function(t) { return attrBase.indexOf(t) !== -1; });\n    if (!isTarget) continue;\n\n    var valueRaw = null;\n    if (vKey && cmd[vKey] !== undefined) {\n        var vArr = cmd[vKey];\n        valueRaw = Array.isArray(vArr) ? vArr[idx] : vArr;\n    }\n    var numValue = (valueRaw !== null && valueRaw !== undefined)\n                    ? String(valueRaw).split(' ')[0] : '0';\n\n    results.push({\n        ts:       ts,\n        seqNum:   seqNum,\n        attr:     attrBase,\n        status:   (status || '').split(' (')[0],\n        dataType: (dt || '').split(' (')[0],\n        value:    numValue\n    });\n}\n\nif (results.length === 0) return null;\n\nmsg.rmsResults = results;\nreturn msg;",
+        "outputs": 1,
+        "x": 1290,
+        "y": 480,
+        "wires": [
+            [
+                "5671ab741fd0bd0a",
+                "52c04fd4b0a0063f"
+            ]
+        ]
+    },
+    {
+        "id": "5671ab741fd0bd0a",
+        "type": "function",
+        "z": "c2a9723ca23517ee",
+        "name": "Format filtered_elems.csv",
+        "func": "var results = msg.rmsResults;\nvar counter = global.get('filteredCounter') || 0;\nvar lines = [];\nif (counter === 0) lines.push('No.,Timestamp,Sequence Number, Attribute,Status,Data Type,Data Value');\n\nfor (var i = 0; i < results.length; i++) {\n    counter++;\n    var r = results[i];\n    lines.push(counter + ',' + r.ts + ',' + r.seqNum + ',' +\n               r.attr + ',' + r.status + ',' + r.dataType + ',' + r.value);\n}\nglobal.set('filteredCounter', counter);\nmsg.payload = lines.join('\\n') + '\\n';\nmsg.filename = '/challenge3/filtered_elems.csv';\nreturn msg;",
+        "outputs": 1,
+        "x": 1550,
+        "y": 440,
+        "wires": [
+            [
+                "fa85642072b58dbb"
+            ]
+        ]
+    },
+    {
+        "id": "fa85642072b58dbb",
+        "type": "file",
+        "z": "c2a9723ca23517ee",
+        "name": "Write filtered_elems.csv",
+        "filename": "/challenge3/filtered_elems.csv",
+        "filenameType": "str",
+        "appendNewline": false,
+        "createDir": true,
+        "overwriteFile": "false",
+        "encoding": "none",
+        "x": 1830,
+        "y": 440,
+        "wires": [
+            []
+        ]
+    },
+    {
+        "id": "52c04fd4b0a0063f",
+        "type": "function",
+        "z": "c2a9723ca23517ee",
+        "name": "Prepare Chart Data",
+        "func": "var results = msg.rmsResults;\nvar ts = msg.rmsResults[0].ts * 1000;\nvar vMsg = null, iMsg = null;\n\nfor (var i = 0; i < results.length; i++) {\n    var r = results[i];\n    var v = parseFloat(r.value);\n    if (r.attr.indexOf('RMS Voltage') !== -1)\n        vMsg = {payload: v, topic: 'RMS Voltage'};\n    if (r.attr.indexOf('RMS Current') !== -1)\n        iMsg = {payload: v, topic: 'RMS Current'};\n}\nreturn [vMsg, iMsg];",
+        "outputs": 2,
+        "x": 1530,
+        "y": 520,
+        "wires": [
+            [
+                "8e8fea7ccb7256c9"
+            ],
+            [
+                "89ced3604a5b9708"
+            ]
+        ]
+    },
+    {
+        "id": "8e8fea7ccb7256c9",
+        "type": "ui_chart",
+        "z": "c2a9723ca23517ee",
+        "name": "RMS Voltage",
+        "group": "chart_grp",
+        "order": 1,
+        "width": 6,
+        "height": 4,
+        "label": "RMS Voltage (V)",
+        "chartType": "line",
+        "legend": "false",
+        "xformat": "HH:mm:ss",
+        "interpolate": "linear",
+        "nodata": "",
+        "ymin": "",
+        "ymax": "",
+        "removeOlder": "1",
+        "removeOlderPoints": "",
+        "removeOlderUnit": "3600",
+        "cutout": 0,
+        "useOneColor": false,
+        "colors": [
+            "#1f77b4"
+        ],
+        "outputs": 1,
+        "x": 1790,
+        "y": 480,
+        "wires": [
+            []
+        ]
+    },
+    {
+        "id": "89ced3604a5b9708",
+        "type": "ui_chart",
+        "z": "c2a9723ca23517ee",
+        "name": "RMS Current",
+        "group": "chart_grp",
+        "order": 2,
+        "width": 6,
+        "height": 4,
+        "label": "RMS Current (A)",
+        "chartType": "line",
+        "legend": "false",
+        "xformat": "HH:mm:ss",
+        "interpolate": "linear",
+        "nodata": "",
+        "ymin": "",
+        "ymax": "",
+        "removeOlder": "1",
+        "removeOlderPoints": "",
+        "removeOlderUnit": "3600",
+        "cutout": 0,
+        "useOneColor": false,
+        "colors": [
+            "#ff7f0e"
+        ],
+        "outputs": 1,
+        "x": 1790,
+        "y": 560,
+        "wires": [
+            []
+        ]
+    },
+    {
+        "id": "a3c2689899ede880",
+        "type": "function",
+        "z": "c2a9723ca23517ee",
+        "name": "Process Link Status",
+        "func": "var row = msg.csvRow;\nvar zbeeSource = row['Source Address ZigBee'];\nvar cmdStr = row['Command String'] || '';\n\nfunction py2json(s) {\n    return s.replace(/'/g, '\"')\n            .replace(/\\bTrue\\b/g, 'true')\n            .replace(/\\bFalse\\b/g, 'false')\n            .replace(/\\bNone\\b/g, 'null');\n}\n\nvar cmd;\ntry { cmd = JSON.parse(py2json(cmdStr)); }\ncatch(e) { node.warn('LinkStatus parse error: ' + e.message); return null; }\n\nvar links = cmd['Links'];\nif (!links || !Array.isArray(links)) return null;\n\nvar linkCosts = global.get('linkCosts') || {};\nfor (var i = 0; i < links.length; i++) {\n    var lnk = links[i];\n    var key = zbeeSource + '|' + lnk['Address'];\n    linkCosts[key] = {\n        source:      zbeeSource,\n        destination: lnk['Address'],\n        cost:        parseInt(lnk['Outgoing Cost'], 10)\n    };\n}\nglobal.set('linkCosts', linkCosts);\nreturn null;",
+        "outputs": 1,
+        "x": 740,
+        "y": 520,
+        "wires": [
+            []
+        ]
+    },
+    {
+        "id": "6be5c27529b67ac8",
+        "type": "function",
+        "z": "c2a9723ca23517ee",
+        "name": "Finalize: Write CSV + ThingSpeak",
+        "func": "// Called once at 200 messages; writes outgoing_cost.csv and queues ThingSpeak sends\nvar linkCosts = global.get('linkCosts') || {};\nvar entries = Object.values(linkCosts);\n\n// Sort by source hex, then destination hex\nentries.sort(function(a, b) {\n    var sa = parseInt(a.source, 16), sb = parseInt(b.source, 16);\n    if (sa !== sb) return sa - sb;\n    return parseInt(a.destination, 16) - parseInt(b.destination, 16);\n});\n\n// Write CSV\nvar csvLines = ['No.,Source,Destination,Cost'];\nfor (var i = 0; i < entries.length; i++)\n    csvLines.push((i+1)+','+entries[i].source+','+entries[i].destination+','+entries[i].cost);\n\nvar csvContent = csvLines.join('\\n') + '\\n';\nvar csvMsg = { payload: csvContent, filename: '/challenge3/outgoing_cost.csv' };\n\n// Find smallest source address\nvar sourceSet = {};\nentries.forEach(function(e) { sourceSet[e.source] = true; });\nvar sources = Object.keys(sourceSet).sort(function(a,b) {\n    return parseInt(a,16) - parseInt(b,16);\n});\nvar smallest = sources[0];\n\n// Destinations for smallest source, sorted ascending hex\nvar targets = entries.filter(function(e){ return e.source === smallest; });\ntargets.sort(function(a,b){ return parseInt(a.destination,16) - parseInt(b.destination,16); });\n\nnode.log('Smallest source: ' + smallest + ', destinations: ' + targets.length);\n\n// Build array of ThingSpeak HTTP messages\n// (url and method are set on the http-request node; do NOT put them on msg in NR4)\nvar tsMsgs = targets.map(function(e) {\n    return {\n        payload: JSON.stringify({ api_key: 'YJ7JTQLLKH2ZISE8', field1: e.cost }),\n        headers: { 'Content-Type': 'application/json' }\n    };\n});\n\n// Output 0: CSV write  Output 1: array of ThingSpeak messages (rate-limited downstream)\nreturn [csvMsg, tsMsgs.length > 0 ? tsMsgs : null];",
+        "outputs": 2,
+        "timeout": "",
+        "noerr": 0,
+        "initialize": "",
+        "finalize": "",
+        "libs": [],
+        "x": 780,
+        "y": 600,
+        "wires": [
+            [
+                "3d806a59be1f90b3"
+            ],
+            [
+                "a8f680b032d4e0f1"
+            ]
+        ]
+    },
+    {
+        "id": "3d806a59be1f90b3",
+        "type": "file",
+        "z": "c2a9723ca23517ee",
+        "name": "Write outgoing_cost.csv",
+        "filename": "/challenge3/outgoing_cost.csv",
+        "filenameType": "str",
+        "appendNewline": false,
+        "createDir": true,
+        "overwriteFile": "true",
+        "encoding": "none",
+        "x": 1090,
+        "y": 540,
+        "wires": [
+            []
+        ]
+    },
+    {
+        "id": "a8f680b032d4e0f1",
+        "type": "delay",
+        "z": "c2a9723ca23517ee",
+        "name": "Rate Limit 1/20s",
+        "pauseType": "rate",
+        "timeout": "5",
+        "timeoutUnits": "seconds",
+        "rate": "1",
+        "nbRateUnits": "20",
+        "rateUnits": "seconds",
+        "randomFirst": "1",
+        "randomLast": "5",
+        "randomUnits": "seconds",
+        "drop": false,
+        "allowrate": false,
+        "outputs": 1,
+        "x": 1060,
+        "y": 640,
+        "wires": [
+            [
+                "fa1fc1a162a07992"
+            ]
+        ]
+    },
+    {
+        "id": "fa1fc1a162a07992",
+        "type": "http request",
+        "z": "c2a9723ca23517ee",
+        "name": "POST to ThingSpeak",
+        "method": "POST",
+        "ret": "txt",
+        "paytoqs": "ignore",
+        "url": "https://api.thingspeak.com/update.json",
+        "tls": "",
+        "persist": false,
+        "proxy": "",
+        "insecureHTTPParser": false,
+        "authType": "",
+        "senderr": false,
+        "headers": [],
+        "x": 1300,
+        "y": 640,
+        "wires": [
+            [
+                "cc1c19f1fe5e5f9e"
+            ]
+        ]
+    },
+    {
+        "id": "cc1c19f1fe5e5f9e",
+        "type": "debug",
+        "z": "c2a9723ca23517ee",
+        "name": "ThingSpeak Response",
+        "active": true,
+        "tosidebar": true,
+        "console": false,
+        "tostatus": false,
+        "complete": "payload",
+        "x": 1560,
+        "y": 640,
+        "wires": []
+    }
+]

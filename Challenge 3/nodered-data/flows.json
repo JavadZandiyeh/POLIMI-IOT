@@ -1,0 +1,575 @@
+[
+  {
+    "id": "challenge3_flow",
+    "type": "tab",
+    "label": "Challenge 3",
+    "disabled": false,
+    "info": ""
+  },
+  {
+    "id": "mqtt_broker_cfg",
+    "type": "mqtt-broker",
+    "name": "Local Mosquitto 1884",
+    "broker": "mosquitto",
+    "port": "1884",
+    "clientid": "nodered_c3",
+    "autoConnect": true,
+    "usetls": false,
+    "protocolVersion": "4",
+    "keepalive": "60",
+    "cleansession": true,
+    "autoUnsubscribe": true,
+    "birthTopic": "",
+    "birthQos": "0",
+    "birthPayload": "",
+    "birthMsg": {},
+    "closeTopic": "",
+    "closeQos": "0",
+    "closePayload": "",
+    "closeMsg": {},
+    "willTopic": "",
+    "willQos": "0",
+    "willPayload": "",
+    "willMsg": {},
+    "userProps": "",
+    "sessionExpiry": ""
+  },
+  {
+    "id": "init_inject",
+    "type": "inject",
+    "name": "Load CSV on startup",
+    "z": "challenge3_flow",
+    "x": 140,
+    "y": 60,
+    "wires": [
+      [
+        "init_file_read"
+      ]
+    ],
+    "props": [
+      {
+        "p": "payload",
+        "v": "",
+        "vt": "date"
+      }
+    ],
+    "repeat": "",
+    "once": true,
+    "onceDelay": 0.5,
+    "topic": "",
+    "payload": "",
+    "payloadType": "date"
+  },
+  {
+    "id": "init_file_read",
+    "type": "file in",
+    "name": "Read challenge3.csv",
+    "z": "challenge3_flow",
+    "x": 360,
+    "y": 60,
+    "wires": [
+      [
+        "init_parse_csv"
+      ]
+    ],
+    "filename": "/challenge3/challenge3.csv",
+    "format": "utf8",
+    "chunk": false,
+    "sendError": false,
+    "encoding": "none"
+  },
+  {
+    "id": "init_parse_csv",
+    "type": "function",
+    "name": "Parse & Store CSV",
+    "z": "challenge3_flow",
+    "x": 590,
+    "y": 60,
+    "wires": [
+      []
+    ],
+    "func": "// CSV parser: handles double-quoted fields that may contain commas\nfunction parseCSVLine(line) {\n    var result = [];\n    var cur = '';\n    var inQ = false;\n    for (var i = 0; i < line.length; i++) {\n        var c = line[i];\n        if (c === '\"') {\n            if (inQ && line[i+1] === '\"') { cur += '\"'; i++; }\n            else inQ = !inQ;\n        } else if (c === ',' && !inQ) {\n            result.push(cur); cur = '';\n        } else cur += c;\n    }\n    result.push(cur);\n    return result;\n}\n\nvar lines = msg.payload.split('\\n');\nvar headers = parseCSVLine(lines[0]);\nvar data = {};\nfor (var i = 1; i < lines.length; i++) {\n    var line = lines[i].trim();\n    if (!line) continue;\n    var fields = parseCSVLine(line);\n    var pktNum = parseInt(fields[0], 10);\n    if (isNaN(pktNum)) continue;\n    var row = {};\n    for (var j = 0; j < headers.length; j++) {\n        row[headers[j].trim()] = (fields[j] !== undefined ? fields[j] : '').trim();\n    }\n    data[pktNum] = row;\n}\nglobal.set('csvData', data);\nglobal.set('msgCount', 0);\nglobal.set('done', false);\nglobal.set('logCounter', 0);\nglobal.set('filteredCounter', 0);\nglobal.set('linkCosts', {});\nnode.log('CSV loaded: ' + Object.keys(data).length + ' rows');\nreturn null;",
+    "outputs": 1
+  },
+  {
+    "id": "pub_inject",
+    "type": "inject",
+    "name": "Every 1 second",
+    "z": "challenge3_flow",
+    "x": 140,
+    "y": 160,
+    "wires": [
+      [
+        "pub_gen_id"
+      ]
+    ],
+    "props": [
+      {
+        "p": "payload",
+        "v": "",
+        "vt": "date"
+      }
+    ],
+    "repeat": "1",
+    "once": false,
+    "onceDelay": 0.1,
+    "topic": "",
+    "payload": "",
+    "payloadType": "date"
+  },
+  {
+    "id": "pub_gen_id",
+    "type": "function",
+    "name": "Generate ID & Timestamp",
+    "z": "challenge3_flow",
+    "x": 360,
+    "y": 160,
+    "wires": [
+      [
+        "pub_mqtt_out",
+        "pub_log_fmt"
+      ]
+    ],
+    "func": "var id = Math.floor(Math.random() * 30001);\nvar ts = Math.floor(Date.now() / 1000);\nmsg.payload = JSON.stringify({\"id\": id, \"timestamp\": ts});\nmsg.genId = id;\nmsg.genTs = ts;\nreturn msg;",
+    "outputs": 2
+  },
+  {
+    "id": "pub_mqtt_out",
+    "type": "mqtt out",
+    "name": "Publish to id_generator",
+    "z": "challenge3_flow",
+    "x": 600,
+    "y": 140,
+    "wires": [
+      []
+    ],
+    "topic": "challenge3/id_generator",
+    "qos": "0",
+    "retain": "false",
+    "respTopic": "",
+    "contentType": "",
+    "userProps": "",
+    "correl": "",
+    "expiry": "",
+    "broker": "mqtt_broker_cfg"
+  },
+  {
+    "id": "pub_log_fmt",
+    "type": "function",
+    "name": "Format id_log.csv",
+    "z": "challenge3_flow",
+    "x": 600,
+    "y": 180,
+    "wires": [
+      [
+        "pub_log_file"
+      ]
+    ],
+    "func": "var counter = (global.get('logCounter') || 0) + 1;\nglobal.set('logCounter', counter);\nvar data = (typeof msg.payload === 'string') ? JSON.parse(msg.payload) : msg.payload;\nvar line = (counter === 1 ? 'No.,ID,TIMESTAMP\\n' : '') +\n           counter + ',' + data.id + ',' + data.timestamp + '\\n';\nmsg.payload = line;\nmsg.filename = '/challenge3/id_log.csv';\nreturn msg;",
+    "outputs": 1
+  },
+  {
+    "id": "pub_log_file",
+    "type": "file",
+    "name": "Write id_log.csv",
+    "z": "challenge3_flow",
+    "x": 810,
+    "y": 180,
+    "wires": [
+      []
+    ],
+    "filename": "/challenge3/id_log.csv",
+    "filenameType": "str",
+    "appendNewline": false,
+    "createDir": true,
+    "overwriteFile": "false",
+    "encoding": "none"
+  },
+  {
+    "id": "sub_mqtt_in",
+    "type": "mqtt in",
+    "name": "Subscribe id_generator",
+    "z": "challenge3_flow",
+    "x": 140,
+    "y": 300,
+    "wires": [
+      [
+        "sub_counter_route"
+      ]
+    ],
+    "topic": "challenge3/id_generator",
+    "qos": "0",
+    "datatype": "auto-detect",
+    "broker": "mqtt_broker_cfg",
+    "nl": false,
+    "rap": true,
+    "rh": 0,
+    "inputs": 0
+  },
+  {
+    "id": "sub_counter_route",
+    "type": "function",
+    "name": "Counter + Route (200 msgs)",
+    "z": "challenge3_flow",
+    "x": 360,
+    "y": 300,
+    "wires": [
+      [
+        "zcl_rate_limit"
+      ],
+      [
+        "link_fn"
+      ],
+      [
+        "dbg_ignore"
+      ],
+      [
+        "fin_fn"
+      ]
+    ],
+    "func": "// Gate: stop after 200 messages; also compute N and route by packet type\nif (global.get('done')) return null;\n\nvar count = (global.get('msgCount') || 0) + 1;\nglobal.set('msgCount', count);\n\nvar data = (typeof msg.payload === 'string') ? JSON.parse(msg.payload) : msg.payload;\nvar id = data.id;\nvar N = id % 5218;\nvar csvData = global.get('csvData');\nif (!csvData) { node.warn('CSV not loaded'); return null; }\n\nvar row = csvData[N];\nvar isDone = (count >= 200);\nif (isDone) global.set('done', true);\n\nvar finalMsg = isDone ? {payload: 'finalize'} : null;\n\nif (!row) {\n    // No matching row \u2013 ignore but count toward 200\n    return [null, null, null, finalMsg];\n}\n\nvar cmdStr = row['Command String'] || '';\nvar packetType = row['Packet Type'] || '';\nvar hasZCL = cmdStr.indexOf(\"'Layer ZBEE_ZCL'\") !== -1 ||\n             cmdStr.indexOf('\"Layer ZBEE_ZCL\"') !== -1;\nvar isLink = packetType.indexOf('Link Status (0x08)') !== -1;\n\nmsg.subId = id;\nmsg.N = N;\nmsg.csvRow = row;\nmsg.cmdStr = cmdStr;\nmsg.packetType = packetType;\n\n// Outputs: 0=ZCL, 1=LinkStatus, 2=Other/Ignore, 3=Finalize trigger\nif (hasZCL)   return [msg,  null, null, finalMsg];\nif (isLink)   return [null, msg,  null, finalMsg];\n              return [null, null, msg,  finalMsg];",
+    "outputs": 4
+  },
+  {
+    "id": "dbg_ignore",
+    "type": "debug",
+    "name": "Ignored messages",
+    "z": "challenge3_flow",
+    "x": 600,
+    "y": 360,
+    "wires": [
+      []
+    ],
+    "active": false,
+    "tosidebar": true,
+    "console": false,
+    "tostatus": false,
+    "complete": "false"
+  },
+  {
+    "id": "zcl_rate_limit",
+    "type": "delay",
+    "name": "Rate Limit 10/min",
+    "z": "challenge3_flow",
+    "x": 140,
+    "y": 440,
+    "wires": [
+      [
+        "zcl_build_fn"
+      ]
+    ],
+    "pauseType": "rate",
+    "timeout": "5",
+    "timeoutUnits": "seconds",
+    "rate": "10",
+    "nbRateUnits": "1",
+    "rateUnits": "minute",
+    "randomFirst": "1",
+    "randomLast": "5",
+    "randomUnits": "seconds",
+    "drop": false,
+    "allowrate": false,
+    "outputs": 1
+  },
+  {
+    "id": "zcl_build_fn",
+    "type": "function",
+    "name": "Build ZCL MQTT Payload",
+    "z": "challenge3_flow",
+    "x": 360,
+    "y": 440,
+    "wires": [
+      [
+        "zcl_mqtt_out"
+      ],
+      [
+        "rms_filter_fn"
+      ]
+    ],
+    "func": "var row = msg.csvRow;\nvar ts = Math.floor(Date.now() / 1000);\nvar devName = row['Device Name ZigBee Source'] || 'unknown';\n\nvar payload = {\n    \"timestamp\": ts,\n    \"id\": msg.subId,\n    \"wpan.src\":  row['Source Address'],\n    \"wpan.dst\":  row['Destination Address'],\n    \"zbee.src\":  row['Source Address ZigBee'],\n    \"zbee.dst\":  row['Destination Address ZigBee'],\n    \"topic\":     \"ZigBee/\" + devName,\n    \"payload\":   row['Command String']\n};\n\n// Output 1: MQTT publish message\n// Output 2: same msg passed along for RMS filtering\nvar mqttMsg = {topic: devName, payload: JSON.stringify(payload)};\nmsg.publishTs = ts;\nreturn [mqttMsg, msg];",
+    "outputs": 2
+  },
+  {
+    "id": "zcl_mqtt_out",
+    "type": "mqtt out",
+    "name": "Publish to ZigBee Topic",
+    "z": "challenge3_flow",
+    "x": 600,
+    "y": 400,
+    "wires": [
+      []
+    ],
+    "topic": "",
+    "qos": "0",
+    "retain": "false",
+    "respTopic": "",
+    "contentType": "",
+    "userProps": "",
+    "correl": "",
+    "expiry": "",
+    "broker": "mqtt_broker_cfg"
+  },
+  {
+    "id": "rms_filter_fn",
+    "type": "function",
+    "name": "Filter RMS / Active Power",
+    "z": "challenge3_flow",
+    "x": 600,
+    "y": 480,
+    "wires": [
+      [
+        "rms_fmt_fn",
+        "chart_prep_fn"
+      ]
+    ],
+    "func": "var cmdStr = msg.cmdStr || msg.csvRow['Command String'] || '';\nvar ts = msg.publishTs || Math.floor(Date.now() / 1000);\n\nvar hasRMS = cmdStr.indexOf('RMS Current') !== -1 ||\n             cmdStr.indexOf('RMS Voltage') !== -1 ||\n             cmdStr.indexOf('Active Power') !== -1;\nif (!hasRMS) return null;\n\n// Convert Python dict string to JSON-parseable\nfunction py2json(s) {\n    return s.replace(/'/g, '\"')\n            .replace(/\\bTrue\\b/g, 'true')\n            .replace(/\\bFalse\\b/g, 'false')\n            .replace(/\\bNone\\b/g, 'null');\n}\n\nvar cmd;\ntry { cmd = JSON.parse(py2json(cmdStr)); }\ncatch(e) { node.warn('Parse error: ' + e.message); return null; }\n\nvar attrs = cmd['Attribute'];\nif (!attrs) return null;\nif (!Array.isArray(attrs)) attrs = [attrs];\n// Skip Read Attributes REQUESTS (no Status = no actual values to save)\nif (!cmd['Status']) return null;\nvar statuses = cmd['Status'];\nif (!Array.isArray(statuses)) statuses = [statuses];\nvar dataTypes = cmd['Data Type'] || [];\nif (!Array.isArray(dataTypes)) dataTypes = [dataTypes];\nvar seqNum = cmd['Sequence Number'] || '';\n\nfunction getValueKey(dt) {\n    if (!dt) return null;\n    var l = dt.toLowerCase();\n    if (l.indexOf('unsigned') !== -1 && l.indexOf('8-bit') !== -1)  return 'Uint8';\n    if (l.indexOf('signed') !== -1   && l.indexOf('8-bit') !== -1)  return 'Int8';\n    if (l.indexOf('unsigned') !== -1 && l.indexOf('16-bit') !== -1) return 'Uint16';\n    if (l.indexOf('signed') !== -1   && l.indexOf('16-bit') !== -1) return 'Int16';\n    if (l.indexOf('unsigned') !== -1 && l.indexOf('32-bit') !== -1) return 'Uint32';\n    if (l.indexOf('signed') !== -1   && l.indexOf('32-bit') !== -1) return 'Int32';\n    return null;\n}\n\nvar targets = ['Active Power', 'RMS Current', 'RMS Voltage'];\nvar typeCounters = {};\nvar results = [];\n\nfor (var i = 0; i < attrs.length; i++) {\n    var attr     = attrs[i];\n    var dt       = Array.isArray(dataTypes) ? dataTypes[i] : dataTypes;\n    var status   = Array.isArray(statuses)  ? statuses[i]  : statuses;\n    var vKey     = getValueKey(dt);\n    var idx      = vKey ? (typeCounters[vKey] || 0) : 0;\n    if (vKey) typeCounters[vKey] = idx + 1;\n\n    var attrBase = attr.split(' (')[0];\n    var isTarget = targets.some(function(t) { return attrBase.indexOf(t) !== -1; });\n    if (!isTarget) continue;\n\n    var valueRaw = null;\n    if (vKey && cmd[vKey] !== undefined) {\n        var vArr = cmd[vKey];\n        valueRaw = Array.isArray(vArr) ? vArr[idx] : vArr;\n    }\n    var numValue = (valueRaw !== null && valueRaw !== undefined)\n                    ? String(valueRaw).split(' ')[0] : '0';\n\n    results.push({\n        ts:       ts,\n        seqNum:   seqNum,\n        attr:     attrBase,\n        status:   (status || '').split(' (')[0],\n        dataType: (dt || '').split(' (')[0],\n        value:    numValue\n    });\n}\n\nif (results.length === 0) return null;\n\nmsg.rmsResults = results;\nreturn msg;",
+    "outputs": 1
+  },
+  {
+    "id": "rms_fmt_fn",
+    "type": "function",
+    "name": "Format filtered_elems.csv",
+    "z": "challenge3_flow",
+    "x": 840,
+    "y": 460,
+    "wires": [
+      [
+        "rms_file"
+      ]
+    ],
+    "func": "var results = msg.rmsResults;\nvar counter = global.get('filteredCounter') || 0;\nvar lines = [];\nif (counter === 0) lines.push('No.,Timestamp,Sequence Number, Attribute,Status,Data Type,Data Value');\n\nfor (var i = 0; i < results.length; i++) {\n    counter++;\n    var r = results[i];\n    lines.push(counter + ',' + r.ts + ',' + r.seqNum + ',' +\n               r.attr + ',' + r.status + ',' + r.dataType + ',' + r.value);\n}\nglobal.set('filteredCounter', counter);\nmsg.payload = lines.join('\\n') + '\\n';\nmsg.filename = '/challenge3/filtered_elems.csv';\nreturn msg;",
+    "outputs": 1
+  },
+  {
+    "id": "rms_file",
+    "type": "file",
+    "name": "Write filtered_elems.csv",
+    "z": "challenge3_flow",
+    "x": 1060,
+    "y": 460,
+    "wires": [
+      []
+    ],
+    "filename": "/challenge3/filtered_elems.csv",
+    "filenameType": "str",
+    "appendNewline": false,
+    "createDir": true,
+    "overwriteFile": "false",
+    "encoding": "none"
+  },
+  {
+    "id": "chart_prep_fn",
+    "type": "function",
+    "name": "Prepare Chart Data",
+    "z": "challenge3_flow",
+    "x": 840,
+    "y": 520,
+    "wires": [
+      [
+        "node_chart_voltage"
+      ],
+      [
+        "node_chart_current"
+      ]
+    ],
+    "func": "var results = msg.rmsResults;\nvar ts = msg.rmsResults[0].ts * 1000;\nvar vMsg = null, iMsg = null;\n\nfor (var i = 0; i < results.length; i++) {\n    var r = results[i];\n    var v = parseFloat(r.value);\n    if (r.attr.indexOf('RMS Voltage') !== -1)\n        vMsg = {payload: v, topic: 'RMS Voltage'};\n    if (r.attr.indexOf('RMS Current') !== -1)\n        iMsg = {payload: v, topic: 'RMS Current'};\n}\nreturn [vMsg, iMsg];",
+    "outputs": 2
+  },
+  {
+    "id": "node_chart_voltage",
+    "type": "ui_chart",
+    "name": "RMS Voltage",
+    "z": "challenge3_flow",
+    "x": 1060,
+    "y": 500,
+    "group": "node_grp_zigbee",
+    "order": 1,
+    "width": 6,
+    "height": 4,
+    "label": "RMS Voltage (V)",
+    "chartType": "line",
+    "legend": "false",
+    "xformat": "HH:mm:ss",
+    "interpolate": "linear",
+    "nodata": "",
+    "dots": false,
+    "ymin": "",
+    "ymax": "",
+    "removeOlder": "1",
+    "removeOlderPoints": "",
+    "removeOlderUnit": "3600",
+    "cutout": 0,
+    "useOneColor": false,
+    "colors": [
+      "#1f77b4"
+    ],
+    "useOldColors": false,
+    "wires": [
+      []
+    ]
+  },
+  {
+    "id": "node_chart_current",
+    "type": "ui_chart",
+    "name": "RMS Current",
+    "z": "challenge3_flow",
+    "x": 1060,
+    "y": 560,
+    "group": "node_grp_zigbee",
+    "order": 2,
+    "width": 6,
+    "height": 4,
+    "label": "RMS Current (A)",
+    "chartType": "line",
+    "legend": "false",
+    "xformat": "HH:mm:ss",
+    "interpolate": "linear",
+    "nodata": "",
+    "dots": false,
+    "ymin": "",
+    "ymax": "",
+    "removeOlder": "1",
+    "removeOlderPoints": "",
+    "removeOlderUnit": "3600",
+    "cutout": 0,
+    "useOneColor": false,
+    "colors": [
+      "#ff7f0e"
+    ],
+    "useOldColors": false,
+    "wires": [
+      []
+    ]
+  },
+  {
+    "id": "node_grp_zigbee",
+    "type": "ui_group",
+    "name": "ZigBee Measurements",
+    "tab": "node_tab_ch3",
+    "order": 1,
+    "disp": true,
+    "width": 12,
+    "collapse": false
+  },
+  {
+    "id": "node_tab_ch3",
+    "type": "ui_tab",
+    "name": "Challenge 3",
+    "icon": "dashboard",
+    "disabled": false,
+    "hidden": false
+  },
+  {
+    "id": "link_fn",
+    "type": "function",
+    "name": "Process Link Status",
+    "z": "challenge3_flow",
+    "x": 600,
+    "y": 640,
+    "wires": [
+      []
+    ],
+    "func": "var row = msg.csvRow;\nvar zbeeSource = row['Source Address ZigBee'];\nvar cmdStr = row['Command String'] || '';\n\nfunction py2json(s) {\n    return s.replace(/'/g, '\"')\n            .replace(/\\bTrue\\b/g, 'true')\n            .replace(/\\bFalse\\b/g, 'false')\n            .replace(/\\bNone\\b/g, 'null');\n}\n\nvar cmd;\ntry { cmd = JSON.parse(py2json(cmdStr)); }\ncatch(e) { node.warn('LinkStatus parse error: ' + e.message); return null; }\n\nvar links = cmd['Links'];\nif (!links || !Array.isArray(links)) return null;\n\nvar linkCosts = global.get('linkCosts') || {};\nfor (var i = 0; i < links.length; i++) {\n    var lnk = links[i];\n    var key = zbeeSource + '|' + lnk['Address'];\n    linkCosts[key] = {\n        source:      zbeeSource,\n        destination: lnk['Address'],\n        cost:        parseInt(lnk['Outgoing Cost'], 10)\n    };\n}\nglobal.set('linkCosts', linkCosts);\nreturn null;",
+    "outputs": 1
+  },
+  {
+    "id": "fin_fn",
+    "type": "function",
+    "name": "Finalize: Write CSV + ThingSpeak",
+    "z": "challenge3_flow",
+    "x": 600,
+    "y": 760,
+    "wires": [
+      [
+        "fin_csv_file"
+      ],
+      [
+        "ts_rate_delay"
+      ]
+    ],
+    "func": "// Called once at 200 messages; writes outgoing_cost.csv and queues ThingSpeak sends\nvar linkCosts = global.get('linkCosts') || {};\nvar entries = Object.values(linkCosts);\n\n// Sort by source hex, then destination hex\nentries.sort(function(a, b) {\n    var sa = parseInt(a.source, 16), sb = parseInt(b.source, 16);\n    if (sa !== sb) return sa - sb;\n    return parseInt(a.destination, 16) - parseInt(b.destination, 16);\n});\n\n// Write CSV\nvar csvLines = ['No.,Source,Destination,Cost'];\nfor (var i = 0; i < entries.length; i++)\n    csvLines.push((i+1)+','+entries[i].source+','+entries[i].destination+','+entries[i].cost);\n\nvar csvContent = csvLines.join('\\n') + '\\n';\nvar csvMsg = { payload: csvContent, filename: '/challenge3/outgoing_cost.csv' };\n\n// Find smallest source address\nvar sourceSet = {};\nentries.forEach(function(e) { sourceSet[e.source] = true; });\nvar sources = Object.keys(sourceSet).sort(function(a,b) {\n    return parseInt(a,16) - parseInt(b,16);\n});\nvar smallest = sources[0];\n\n// Destinations for smallest source, sorted ascending hex\nvar targets = entries.filter(function(e){ return e.source === smallest; });\ntargets.sort(function(a,b){ return parseInt(a.destination,16) - parseInt(b.destination,16); });\n\nnode.log('Smallest source: ' + smallest + ', destinations: ' + targets.length);\n\n// Build array of ThingSpeak HTTP messages\n// (url and method are set on the http-request node; do NOT put them on msg in NR4)\nvar tsMsgs = targets.map(function(e) {\n    return {\n        payload: JSON.stringify({ api_key: 'BWN63710GKUG1HR9', field1: e.cost }),\n        headers: { 'Content-Type': 'application/json' }\n    };\n});\n\n// Output 0: CSV write  Output 1: array of ThingSpeak messages (rate-limited downstream)\nreturn [csvMsg, tsMsgs.length > 0 ? tsMsgs : null];",
+    "outputs": 2
+  },
+  {
+    "id": "fin_csv_file",
+    "type": "file",
+    "name": "Write outgoing_cost.csv",
+    "z": "challenge3_flow",
+    "x": 840,
+    "y": 720,
+    "wires": [
+      []
+    ],
+    "filename": "/challenge3/outgoing_cost.csv",
+    "filenameType": "str",
+    "appendNewline": false,
+    "createDir": true,
+    "overwriteFile": "true",
+    "encoding": "none"
+  },
+  {
+    "id": "ts_rate_delay",
+    "type": "delay",
+    "name": "Rate Limit 1/20s",
+    "z": "challenge3_flow",
+    "x": 840,
+    "y": 800,
+    "wires": [
+      [
+        "ts_http"
+      ]
+    ],
+    "pauseType": "rate",
+    "timeout": "5",
+    "timeoutUnits": "seconds",
+    "rate": "1",
+    "nbRateUnits": "20",
+    "rateUnits": "seconds",
+    "randomFirst": "1",
+    "randomLast": "5",
+    "randomUnits": "seconds",
+    "drop": false,
+    "allowrate": false,
+    "outputs": 1
+  },
+  {
+    "id": "ts_http",
+    "type": "http request",
+    "name": "POST to ThingSpeak",
+    "z": "challenge3_flow",
+    "x": 1060,
+    "y": 800,
+    "wires": [
+      [
+        "ts_debug"
+      ]
+    ],
+    "method": "POST",
+    "ret": "txt",
+    "paytoqs": "ignore",
+    "url": "https://api.thingspeak.com/update.json",
+    "tls": "",
+    "persist": false,
+    "proxy": "",
+    "insecureHTTPParser": false,
+    "authType": "",
+    "senderr": false,
+    "headers": []
+  },
+  {
+    "id": "ts_debug",
+    "type": "debug",
+    "name": "ThingSpeak Response",
+    "z": "challenge3_flow",
+    "x": 1300,
+    "y": 800,
+    "wires": [
+      []
+    ],
+    "active": true,
+    "tosidebar": true,
+    "console": false,
+    "tostatus": false,
+    "complete": "payload"
+  }
+]
